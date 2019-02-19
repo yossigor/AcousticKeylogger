@@ -45,35 +45,5 @@ and identify impacting factors.
 One of our first tasks was to review the research that done so far on acoustic keylogging.
 ### Detailed explanation of the algorithms used in Skype&Type project
 The details of the implemetation can be found in this [paper](https://arxiv.org/abs/1609.09359).
-### Training a model using Skype&Type
-First you should get a nice set of wav files that contains recordings from your victim. For each wav file that you have you should supply a "ground truth" file, this file should contain the labels of each keystrok in the corresponding wav file in a separate line.
-For example if you have a recording of all the letters from a to z and a space in the file abc.wav. You should supply a abc.txt file that contains:
-a
-b
-c
-d
-.
-.
-.
-x
-y
-z
-_
-Where  the . . . represents that you should continue with the labels of the other keys and _ represents the space key. You should get all those pairs of wav and ground truth in the same folder.
-run:
-`cd Skype-Type`
-In order to use Logistic regression algorithm run the following command:
-`python generate_model.py sound_test6 model`
-It indicates that the training data is in the sound_test6 folder and that the output will be in a file named model.
-For the KNeighbors algorithm run:
-`python generate_miodel.py -c KNeighborsClassifier sklearn.neighbors --no_feature_selection train_folder model`
-When you first run the generate_model.py script it will perform key extraction and feature extraction from every wav file and it will output them to a .press file. In the following runs of that script you it will read the .press files instead of analysing (They call it "mining") them again.
-The output will be something like this:
-```Found 11 files already mined
-Found 0 files to mine
-Learning...
-Learning task completed!
-Writing model to disk
-Estimating accuracy...
-0.691998936736
+
 ```
