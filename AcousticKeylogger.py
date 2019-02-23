@@ -1,12 +1,12 @@
 import asyncio
 from SoundProcessor import SoundProcessor
 from ModelGenerator import ModelGenerator
+from Classifier import Classifier
 
 class AcousticKeylogger:
     def __init__(self):
         self.sound_processor = SoundProcessor()
         self.model_generator = ModelGenerator()
+        self.classifier = Classifier()
     async def hello(self):
-        print("hello,")
-        await self.sound_processor.hello()
-        await self.model_generator.hello()
+        await self.model_generator.generate_model("../samples/k260_train","../samples/model_1")
