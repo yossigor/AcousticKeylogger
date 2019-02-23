@@ -9,4 +9,4 @@ class AcousticKeylogger:
         self.model_generator = ModelGenerator()
         self.classifier = Classifier()
     async def hello(self):
-        await self.model_generator.generate_model("../samples/k260_train","../samples/model_1")
+        await self.model_generator.generate_model("../samples/k260_train_test","../samples/model_1")

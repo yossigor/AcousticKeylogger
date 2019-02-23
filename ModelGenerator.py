@@ -1,6 +1,10 @@
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import os
 import pprint
+import itertools
+from Listener import Listener
+from Dispatcher import Dispatcher
 
 class ModelGenerator:
     def __init__(self):
@@ -9,6 +13,8 @@ class ModelGenerator:
         self.wav_files = []
         self.label_files = []
         self.press_files = []
+        self.wavfiles_map = {}
+        self.pressfiles_map = {}
     def add_file(self,fl):
         ext = os.path.splitext(fl)[1]
         if ext == '.wav':
@@ -40,29 +46,44 @@ class ModelGenerator:
         print("Press files ({}):".format(len(self.press_files)))
         pp.pprint(self.press_files)
         await self.check_files()
+        await self.process_files()
     async def check_files(self):
         # Every wavfile and pressfile needs a corresponding label file (same name, any extension)
         # Otherwise raise an error
-        print("Checking files")
-        wavfiles_map = {}
+        print("Checking files...")
         for f in self.wav_files:
             basename = os.path.splitext(os.path.basename(f))[0]
             if os.path.splitext(f)[0] + '.press' not in self.press_files:
-                wavfiles_map[f] = None
+                self.wavfiles_map[f] = None
                 for l_f in self.label_files:
                     if os.path.splitext(os.path.basename(l_f))[0] == basename:
-                        wavfiles_map[f] = l_f
-        pressfiles_map = {}
+                        self.wavfiles_map[f] = l_f
         for f in self.press_files:
             basename = os.path.splitext(os.path.basename(f))[0]
-            pressfiles_map[f] = None
+            self.pressfiles_map[f] = None
             for l_f in self.label_files:
                 if os.path.splitext(os.path.basename(l_f))[0] == basename:
-                    pressfiles_map[f] = l_f
+                    self.pressfiles_map[f] = l_f
 
-        mismatches = [x for x, y in wavfiles_map.items() if y is None] + \
-                    [x for x, y in pressfiles_map.items() if y is None]
+        mismatches = [x for x, y in self.wavfiles_map.items() if y is None] + \
+                    [x for x, y in self.pressfiles_map.items() if y is None]
         if len(mismatches) != 0:
             error_message = "Can't find labels for some wav files / press files!"
             offending_files = mismatches
             raise(Exception(error_message + "\n Offending files:" + str(offending_files)))
+    async def process_files(self):
+        print("Found {} files already mined".format(len(self.press_files)))
+        print("Found {} files to mine".format(len(self.wav_files) - len(self.press_files)))
+        #listening task
+        listening_tasks = [];
+        executor = ThreadPoolExecutor(max_workers=4)
+        for i,(wav_file,label_file) in enumerate(self.wavfiles_map.items()):
+            listening_tasks.append(asyncio.get_running_loop().run_in_executor(
+                executor,Listener.read_wav_file,wav_file))
+        wav_data_list = await asyncio.gather(*listening_tasks);
+        dispatching_tasks = [];
+        for wav_data in wav_data_list:
+            dispatching_tasks.append(asyncio.get_running_loop().run_in_executor(
+                executor,Dispatcher.offline,wav_data))
+        await asyncio.gather(*dispatching_tasks);
+

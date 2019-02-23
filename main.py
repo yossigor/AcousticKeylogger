@@ -2,11 +2,10 @@ import asyncio
 from AcousticKeylogger import AcousticKeylogger 
 
 async def main():
-    keyloggers = []
-    for i in range(5):
-         keyloggers.append(AcousticKeylogger())
-    for i in range(len(keyloggers)):
-        asyncio.create_task(keyloggers[i].hello())
+    for i in range(1):
+        acoustic_keylogger = AcousticKeylogger()
+        await acoustic_keylogger.hello()
+
     
 
 asyncio.run(main())
