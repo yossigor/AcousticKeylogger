@@ -1,5 +1,5 @@
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 import os
 import pprint
 import itertools
@@ -76,7 +76,7 @@ class ModelGenerator:
         print("Found {} files to mine".format(len(self.wav_files) - len(self.press_files)))
         #listening task
         listening_tasks = [];
-        executor = ThreadPoolExecutor(max_workers=4)
+        executor = ProcessPoolExecutor(max_workers=4)
         for i,(wav_file,label_file) in enumerate(self.wavfiles_map.items()):
             listening_tasks.append(asyncio.get_running_loop().run_in_executor(
                 executor,Listener.read_wav_file,wav_file))
