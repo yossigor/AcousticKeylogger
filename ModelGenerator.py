@@ -3,8 +3,10 @@ from concurrent.futures import ProcessPoolExecutor
 import os
 import pprint
 import itertools
+import numpy as np
 from Listener import Listener
 from Dispatcher import Dispatcher
+
 
 class ModelGenerator:
     def __init__(self):
@@ -15,6 +17,8 @@ class ModelGenerator:
         self.press_files = []
         self.wavfiles_map = {}
         self.pressfiles_map = {}
+        self.f_X = []
+        self.f_y = []
     def add_file(self,fl):
         ext = os.path.splitext(fl)[1]
         if ext == '.wav':
@@ -85,5 +89,31 @@ class ModelGenerator:
         for wav_data in wav_data_list:
             dispatching_tasks.append(asyncio.get_running_loop().run_in_executor(
                 executor,Dispatcher.offline,wav_data))
-        await asyncio.gather(*dispatching_tasks);
+        dispatcher_output = await asyncio.gather(*dispatching_tasks);
+        for i,(wav_file,label_file) in enumerate(self.wavfiles_map.items()):
+            ground_truth = np.loadtxt(label_file, dtype=str)
+            if len(dispatcher_output[i]) != len(ground_truth):
+                # More mined events than ground truth values
+                raise Exception(
+                """more mined events than ground truth values. \nKeystrokes in ground truth: {}\
+                    \nKeystrokes found in {}: {}
+                """.format(len(dispatcher_output[i]),wav_file,len(ground_truth)))
+            else:
+                _x = []
+                # Collect results until the number of letters we know is in the file
+                while len(_x) < len(ground_truth):
+                    _x.append(dispatcher_output[i].pop(0))
+                X = [[] for _ in range(len(_x))]
+                for idx, sample in _x:
+                    X[idx] = sample
+                np.savetxt(os.path.splitext(wav_file)[0] + '.press', X)
+                self.f_X.extend(X)
+                self.f_y.extend(ground_truth)
+        # .press files already present only need to be loaded from disk and appended to the matrix
+        for i, (press_file, label_file) in enumerate(self.pressfiles_map.items()):
+            self.f_X.extend(np.loadtxt(press_file))
+            self.f_y.extend(np.loadtxt(label_file, dtype=str))
+        self.f_X, self.f_y = np.array(self.f_X), np.array(self.f_y)
+
+
 
