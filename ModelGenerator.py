@@ -80,7 +80,8 @@ class ModelGenerator:
         pipeline.append(('MFCC', MFCC()))
         pipeline.append(('Scaler', MinMaxScaler()))
         # 2 - Feature selector and classifier
-        classifier = getattr(importlib.import_module('sklearn.linear_model'), 'LogisticRegression')()
+        classifier = getattr(importlib.import_module('sklearn.linear_model'),
+         'LogisticRegression')(solver='lbfgs',multi_class='auto',max_iter=300,n_jobs=4)
         pipeline.append(('Feature Selection',
                         RFECV(classifier, step=self.f_X.shape[1] / 10, cv=5, verbose=0)))
         pipeline.append(('Classifier', classifier))
@@ -90,9 +91,9 @@ class ModelGenerator:
         # Fit and save fitted model to file. Output stats about estimated accuracy
         clf.fit(self.f_X, self.f_y)
         print("Learning task completed!")
-        print("Writing model to disk")
+        #print("Writing model to disk")
         self.clf = clf
-        joblib.dump(clf, model_output_path)
+        return clf
     async def check_files(self):
         # Every wavfile and pressfile needs a corresponding label file (same name, any extension)
         # Otherwise raise an error
