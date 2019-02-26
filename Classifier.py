@@ -1,5 +1,7 @@
 import asyncio
 import numpy as np
+import operator
+import functools
 from Listener import Listener
 from Dispatcher import Dispatcher
 from concurrent.futures import ProcessPoolExecutor
@@ -40,6 +42,12 @@ class Classifier:
             working_tasks.append(asyncio.get_running_loop().run_in_executor(
                 executor,Worker.work,self.clf,data_for_worker,10))
         working_output = await asyncio.gather(*working_tasks)
-        return working_output
+        return functools.reduce(operator.iconcat, working_output, [])
     async def check_accuracy(self,predictions,top_n,truth):
-        pass
+        print('Checking accuracy')
+        count = 0
+        for i,prediction in predictions:
+            for j in range(0,top_n):
+                if(prediction[j]==truth[i]):
+                    count += 1
+        return float(count)/float(len(predictions))
