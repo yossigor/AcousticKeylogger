@@ -4,9 +4,31 @@ import os
 import pprint
 import itertools
 import numpy as np
+import importlib
+from sklearn.externals import joblib
+from sklearn.feature_selection import RFECV
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler
 from Listener import Listener
 from Dispatcher import Dispatcher
+from Classifier import Classifier
 
+import python_speech_features as sf
+from sklearn.base import BaseEstimator, ClassifierMixin
+import numpy as np
+
+
+class BaseMiner(BaseEstimator, ClassifierMixin):
+    def fit(self, X, y):
+        return self
+
+
+class MFCC(BaseMiner):
+    @staticmethod
+    def transform(X):
+        return np.array([sf.mfcc(sample, 44100, 0.01, 0.0025, 32, 32, preemph=0, highfreq=12000, ceplifter=0,
+                       appendEnergy=False).flatten() for sample in X])
 
 class ModelGenerator:
     def __init__(self):
@@ -19,6 +41,7 @@ class ModelGenerator:
         self.pressfiles_map = {}
         self.f_X = []
         self.f_y = []
+        self.clf = None
     def add_file(self,fl):
         ext = os.path.splitext(fl)[1]
         if ext == '.wav':
@@ -51,6 +74,25 @@ class ModelGenerator:
         pp.pprint(self.press_files)
         await self.check_files()
         await self.process_files()
+        # Load pipeline steps
+        # 1 - Feature extraction
+        pipeline = []
+        pipeline.append(('MFCC', MFCC()))
+        pipeline.append(('Scaler', MinMaxScaler()))
+        # 2 - Feature selector and classifier
+        classifier = getattr(importlib.import_module('sklearn.linear_model'), 'LogisticRegression')()
+        pipeline.append(('Feature Selection',
+                        RFECV(classifier, step=self.f_X.shape[1] / 10, cv=5, verbose=0)))
+        pipeline.append(('Classifier', classifier))
+        clf = Pipeline(pipeline)
+        
+        print("Learning...")
+        # Fit and save fitted model to file. Output stats about estimated accuracy
+        clf.fit(self.f_X, self.f_y)
+        print("Learning task completed!")
+        print("Writing model to disk")
+        self.clf = clf
+        joblib.dump(clf, model_output_path)
     async def check_files(self):
         # Every wavfile and pressfile needs a corresponding label file (same name, any extension)
         # Otherwise raise an error
@@ -114,6 +156,9 @@ class ModelGenerator:
             self.f_X.extend(np.loadtxt(press_file))
             self.f_y.extend(np.loadtxt(label_file, dtype=str))
         self.f_X, self.f_y = np.array(self.f_X), np.array(self.f_y)
+    async def estimateAccuracy(self):
+        print("Estimating accuracy...")
+        print(np.mean(cross_val_score(self.clf, self.f_X, self.f_y, cv=6)))
 
 
 

@@ -1,7 +1,7 @@
 import asyncio
 
 class Classifier:
-    def __init__(self):
+    def __init__(self,type):
         pass
-    async def hello(self):
-        print("hello from classifier")
+    def learn():
+        pass
