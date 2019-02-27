@@ -44,7 +44,7 @@ In order to use our software you must have the following requirements:
 ## Training a model
 In order to train a model you should prepare a folder containing pairs of .wav files and .txt files (the "ground truth").
 Use this command to generate the model:
-> python3.7 write_model_to_disk.py --training_folder <trainig folder path> --output <model output path>
+> python3.7 write_model_to_disk.py --training_folder <&lt;trainig folder path&gt;> --output <&lt;model output path&gt;>
 
 for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
 
@@ -53,14 +53,14 @@ for more information check our [wiki](https://github.com/yossigor/AcousticKeylog
 ### Classification attack
 After generating a model, the classification attack is used to classify the keystrokes from a .wav file. For example, if you have a model that was trained for the victim's keyboard and you have another file with unknown keystrokes you can use the Acoustic keylogger to classify those keystrokes.
 Use this command to perform the attack:
-> python3.7 classification_attack.py --target_file <target file> --model_file <model file>
+> python3.7 classification_attack.py --target_file <&lt;target file&gt;> --model_file <&lt;model file&gt;>
 
 for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
 
 ### Smart Dictionary attack
 This attack is used to generate a dictionary for the victim's password. You will need a trained model and a folder containing recordings of the victim's password.
 Use this command to perform the attack:
-> python3.7 get_smart_dictionary.py --passwords_recordings_folder <passwords folder> --dictionary_output <dictinary output file> --model_file <model file>
+> python3.7 get_smart_dictionary.py --passwords_recordings_folder <&lt;passwords folder&gt;> --dictionary_output <&lt;dictinary output file&gt;> --model_file <&lt;model file&gt;>
 
 for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
 
