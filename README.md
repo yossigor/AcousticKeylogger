@@ -50,7 +50,7 @@ for more information check our [wiki](https://github.com/yossigor/AcousticKeylog
 
 ## The attacks
 
-### Classificaion attack
+### Classification attack
 After generating a model, the classification attack is used to classify the keystrokes from a .wav file. For example, if you have a model that was trained for the victim's keyboard and you have another file with unknown keystrokes you can use the Acoustic keylogger to classify those keystrokes.
 Use this command to perform the attack:
 > python3.7 classification_attack.py --target_file <target file> --model_file <model file>
