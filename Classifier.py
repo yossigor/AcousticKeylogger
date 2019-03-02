@@ -24,13 +24,14 @@ class Worker:
         return output
 
 class Classifier:
-    def __init__(self,clf):
+    def __init__(self,clf,config):
         self.clf = clf
+        self.config = config
     async def process_file(self,file_path):
         print('processing {}'.format(file_path))
         listener_output = Listener.read_wav_file(file_path)
         print('Listening completed')
-        dispatcher_output = Dispatcher.offline(listener_output)
+        dispatcher_output = Dispatcher.offline(listener_output,self.config)
         print('Dispatching completed')
         return dispatcher_output;
     async def classify(self,file_path):

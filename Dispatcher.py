@@ -3,11 +3,7 @@ import numpy as np
 import math
 
 
-dispatcher_threshold = 80
-dispatcher_min_interval = 14000
-dispatcher_window_size = 100
-dispatcher_step_size = 1
-dispatcher_persistence = True
+
     
 
 class Dispatcher:
@@ -20,7 +16,12 @@ class Dispatcher:
     def normalize(series):
         return series / Dispatcher.rms(series)
         
-    def offline(data):
+    def offline(data, config):
+        dispatcher_threshold = config['dispatcher_threshold']
+        dispatcher_min_interval = config['dispatcher_min_interval']
+        dispatcher_window_size = config['dispatcher_window_size']
+        dispatcher_step_size = config['dispatcher_step_size']
+        dispatcher_persistence = config['dispatcher_persistence']
         print("DISPATCHER:processing data...")
         output = []
         rem = len(data) % 441
@@ -45,6 +46,7 @@ class Dispatcher:
                     # It is a keypress event (maybe)
                     keypress = Dispatcher.normalize(data[x:x + int(sample_length)])
                     past_x = x
+                    #print("found keystroke {} in {}".format(keypress,x / 440))
                     output.append([idx, keypress])
                     idx += 1
                     events.append(keypress)

@@ -31,7 +31,8 @@ class MFCC(BaseMiner):
                        appendEnergy=False).flatten() for sample in X])
 
 class ModelGenerator:
-    def __init__(self):
+    def __init__(self,config):
+        self.config = config
         self.files_to_mine = {}
         self.mined_files = {}
         self.wav_files = []
@@ -123,7 +124,7 @@ class ModelGenerator:
         print("Found {} files to mine".format(len(self.wav_files) - len(self.press_files)))
         #listening task
         listening_tasks = [];
-        executor = ProcessPoolExecutor(max_workers=4)
+        executor = ProcessPoolExecutor(max_workers=10)
         for i,(wav_file,label_file) in enumerate(self.wavfiles_map.items()):
             listening_tasks.append(asyncio.get_running_loop().run_in_executor(
                 executor,Listener.read_wav_file,wav_file))
@@ -131,16 +132,17 @@ class ModelGenerator:
         dispatching_tasks = [];
         for wav_data in wav_data_list:
             dispatching_tasks.append(asyncio.get_running_loop().run_in_executor(
-                executor,Dispatcher.offline,wav_data))
+                executor,Dispatcher.offline,wav_data,self.config))
         dispatcher_output = await asyncio.gather(*dispatching_tasks);
         for i,(wav_file,label_file) in enumerate(self.wavfiles_map.items()):
             ground_truth = np.loadtxt(label_file, dtype=str)
             if len(dispatcher_output[i]) != len(ground_truth):
                 # More mined events than ground truth values
-                raise Exception(
+                print(
                 """more mined events than ground truth values. \nKeystrokes in ground truth: {}\
                     \nKeystrokes found in {}: {}
-                """.format(len(dispatcher_output[i]),wav_file,len(ground_truth)))
+                """.format(len(ground_truth),wav_file,len(dispatcher_output[i])))
+                continue
             else:
                 _x = []
                 # Collect results until the number of letters we know is in the file
