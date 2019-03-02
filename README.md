@@ -1,49 +1,73 @@
-# AcousticKeylogger
-##### advisors
-Danny Tylman
-Amir Schwartz
-##### students
-Meshi Fried
-Yossi Gorshomov
-## Project proposal
-### Background
-Recording keystrokes made by a user is known as “keylogging” and is a well-known method of cyberattack. Keyloggers pose a significant threat, since they are a common tool in the hands of cyber criminals trying to steal user credentials – which are then used to leak and manipulate sensitive data.
-A keylogger may be active in specific short time-intervals or on a continuous basis, monitoring and recording keystrokes made by the user and delivering them to the attacker. In most cases, keyloggers are implemented by malware installed on the target computer. In some cases this is done unintentionally and unknowingly by the user himself while browsing the Internet or opening malicious files, in other cases it can be part of a larger and more sophisticated cyber campaign.
-The purpose of this project is to explore the viability and effectiveness of a new type of keylogger.
-Instead of using a malware installed on the target computer itself to record keystrokes, an acoustic keylogger can be deployed on a separate dedicated device and monitor keystrokes on another keyboard based on the acoustic sound fingerprinting. Such a keylogger can be installed on a small “system-on-chip” device or a smartphone, thus eliminating the need to infiltrate the target computer itself and expanding the attack surface.
-### Scope
-The project will consist of building a prototype of a working acoustic keylogger. This keylogger will analyze sounds of keystrokes and reconstruct the corresponding text that was typed. The keylogger should use a machine learning model trained using sound samples of keystrokes, and may improve its model while more and more keylogged data is received.
-Some of the main research questions that should be addressed during the project:
-* Which machine learning algorithm is best suitable for this task?
-* What is the quality of the reconstructed text compared to the original keystrokes?
-* Is the model generic or dependent on the type of keyboard?
-* Is the model generic or dependent on the specific user?
-* Are there any factors that affect the quality of the keylogger: physical distance of the recording from the keyboard, quality of the sound recording, etc?
-* Can the keylogger learn during its run, without a specific configuration for each keyboard and user?
-### Delivery
-The goal of the project is to deliver a working prototype of an acoustic keylogger and provide
-statistics on the quality of its results – i.e., reconstructing text based on analyzing the sounds of the corresponding keystrokes.
-The minimal requirement is to deliver the keylogger as a standalone Linux or Windows-based
-application that can analyze a file containing the recording of keystrokes and reconstruct the
-corresponding text accordingly in offline mode. The application can be written in any computer language preferred by the students.
-Delivering the keylogger as a real-time application that can monitor keystrokes as they are being
-typed and reconstruct the text on-the-fly, either on a system-on-chip device such as Raspberry Pi or as a smartphone application, would be a significant enhancement to the project.
-### High-level breakdown to phases/tasks:
-1. Review the existing status of research in this field and previous attempts to build acoustic
-keyloggers.
-2. Build an initial machine learning model and train it using sound samples.
-3. Test the model to identify impacting factors and tune it accordingly. If needed, examine
-different types of machine learning algorithms to select the best one.
-4. Design a standalone Windows or Linux-based application for implementing the model,
-analyzing sound files of keystrokes, and reconstructing the corresponding text in offline mode. Alternatively – design a real-time system-on-chip or smartphone application.
-5. Build the keylogger application according to stage #4.
-6. Run multiple tests on the keylogger to measure the quality of the results, provide statistics,
-and identify impacting factors.
-7. Improve over as best as you can
-## Using the Skype&Type project for Acoustic Keylogging
-[Skype&Type project ](https://github.com/SPRITZ-Research-Group/Skype-Type) already implemented an acoustic keylogging program. You can see the project as presented by Daniele Lain in Black Hat USA 2017 [video](https://www.youtube.com/watch?v=iD9Obu7NWso).
-One of our first tasks was to review the research that done so far on acoustic keylogging.
-### Detailed explanation of the algorithms used in Skype&Type project
-The details of the implemetation can be found in this [paper](https://arxiv.org/abs/1609.09359).
+# Acoustic Keylogger
+A python based software implementing keyboard acoustic eavesdropping attacks by training a machine learning classifier using only the acoustic fingerprints of a user keystrokes.
 
-```
+## Table of Contents
+- [Introduction](#introduction)
+- [Previous projects](#previous-projects)
+- [Project structure](#project-structure)
+- [Requirements](#requirements)
+- [Training a model](#training-a-model)
+- [The attacks](#the-attacks)
+    * [Classification attack](#classification-attack)
+    * [Smart Dictionary attack](#smart-dictionary-attack)
+- [Authors](#authors)
+- [Advisors](#advisors)
+
+## Introduction
+The purpose of this project is to explore the viability and effectiveness of a new type of keylogger. Instead of using a malware installed on the target computer itself to record keystrokes, an acoustic keylogger can be deployed on a separate dedicated device and monitor keystrokes on another keyboard based on the acoustic sound fingerprinting.
+
+## Previous projects
+[Skype&Type project ](https://github.com/SPRITZ-Research-Group/Skype-Type) had already implemented an acoustic keylogging program. You can see the project as presented by Daniele Lain in Black Hat USA 2017 [video](https://www.youtube.com/watch?v=iD9Obu7NWso).
+The details of the implemetation can be found in this [paper](https://arxiv.org/abs/1609.09359).
+our project is based on S&T with a few upgrades and new features.
+
+## Project structure
+- The folder Skype-Type @ 0c0c88b contains S&T project. We converted it to python 3 and used asynchronous library instead of multi-process scripts.
+- The main bulding blocks:
+    * ModelGenerator.py - trains a model.
+    * Dispatcher.py - extracts keypress sounds from the .wav file.
+    * Listener.py - responsible for loading sound files.
+    * SoundProcessor.py - responsible for the preprocessing of a .wav file.
+- write_model_to_disk.py - the script fot training a model.
+- The attacks:
+    * classification_attack.py
+    * get_smart_dictionary.py
+
+## Requirements
+In order to use our software you must have the following requirements:
+- Python 3.x 
+- pip - python package manager
+- numpy
+- sklearn
+- python_speech_features
+
+## Training a model
+In order to train a model you should prepare a folder containing pairs of .wav files and .txt files (the "ground truth").
+Use this command to generate the model:
+> python3.7 write_model_to_disk.py --training_folder &lt;trainig folder path&gt; --output &lt;model output path&gt;
+
+for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
+
+## The attacks
+
+### Classification attack
+After generating a model, the classification attack is used to classify the keystrokes from a .wav file. For example, if you have a model that was trained for the victim's keyboard and you have another file with unknown keystrokes you can use the Acoustic keylogger to classify those keystrokes.
+Use this command to perform the attack:
+> python3.7 classification_attack.py --target_file &lt;target file&gt; --model_file &lt;model file&gt;
+
+for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
+
+### Smart Dictionary attack
+This attack is used to generate a dictionary for the victim's password. You will need a trained model and a folder containing recordings of the victim's password.
+Use this command to perform the attack:
+> python3.7 get_smart_dictionary.py --passwords_recordings_folder &lt;passwords folder&gt; --dictionary_output &lt;dictinary output file&gt; --model_file &lt;model file&gt;
+
+for more information check our [wiki](https://github.com/yossigor/AcousticKeylogger/wiki).
+
+## Authors
+[Meshi Fried](https://github.com/MeshiFried) and [Yossi Gorshomov](https://github.com/yossigor)
+Technion - Israel Institute of Technology
+
+## Advisors
+Danny Tylman Amir Schwartz
+
