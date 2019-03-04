@@ -23,4 +23,17 @@ class SoundProcessor:
             elif filename.endswith(".txt"):
                 output_path = os.path.join(output_folder,filename)
                 copyfile(os.path.join(training_folder,filename),output_path)
-                
+    async def band_pass_train_folder(self,training_folder,output_folder,center,width):
+        for filename in os.listdir(training_folder):
+            if filename.endswith(".wav"): 
+                print("sound processor found {}".format(filename))
+                output_path = os.path.join(output_folder,filename)
+                print("writing to {}".format(output_path))
+                await self.band_pass_file(os.path.join(training_folder,filename),output_path,center,width)
+            elif filename.endswith(".txt"):
+                output_path = os.path.join(output_folder,filename)
+                copyfile(os.path.join(training_folder,filename),output_path)
+    async def band_pass_file(self,input_file_name,output_file_name,center, width):
+        print("bandpassing {}, center = {}, width = {}".format(input_file_name,center,width))
+        # We run the sox application for sound processing 
+        subprocess.run(["sox",input_file_name,output_file_name, "band",str(center),str(width)])
