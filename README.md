@@ -35,7 +35,7 @@ our project is based on S&T with a few upgrades and new features.
 
 ## Requirements
 In order to use our software you must have the following requirements:
-- Python 3.x 
+- Python 3.7 
 - pip - python package manager
 - numpy
 - sklearn
