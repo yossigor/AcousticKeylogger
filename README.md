@@ -40,6 +40,7 @@ In order to use our software you must have the following requirements:
 - numpy
 - sklearn
 - python_speech_features
+- sox (for audio processing) [link](http://sox.sourceforge.net/)
 
 ## Training a model
 In order to train a model you should prepare a folder containing pairs of .wav files and .txt files (the "ground truth").
