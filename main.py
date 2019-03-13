@@ -42,8 +42,8 @@ async def time_stretch_over_accuracy():
 
 async def band_pass_over_accuracy():
     results = []
-    band_pass_width = 200
-    for i,band_pass_center in enumerate(range(300,15000,200)):
+    band_pass_width = 400
+    for i,band_pass_center in enumerate(range(12900,20000,400)):
         config = {
             'dispatcher_threshold':80,
             'dispatcher_min_interval':int(14000),
@@ -51,7 +51,7 @@ async def band_pass_over_accuracy():
             'dispatcher_step_size': 1,
             'dispatcher_persistence': True,
             #'time_stretch': time_stretch_factor
-            'band_pass_width': 200,
+            'band_pass_width': band_pass_width,
             'band_pass_center': band_pass_center,
         }
         acoustic_keylogger = AcousticKeylogger(config)

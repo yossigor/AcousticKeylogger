@@ -119,5 +119,4 @@ class AcousticKeylogger:
         output_file.close()
     async def sound_preprocess(self,training_folder,output_folder):
         #await self.sound_processor.time_stretch_train_folder(training_folder,output_folder,self.config['time_stretch'])
-        await self.sound_processor.band_pass_train_folder(training_folder,output_folder,
-        self.config['band_pass_center'],self.config['band_pass_width'])
+        await self.sound_processor.compand_folder(training_folder,output_folder)
